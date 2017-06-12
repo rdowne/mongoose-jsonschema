@@ -9,75 +9,75 @@ var chai = require('chai'),
 
     expect = chai.expect;
 
-describe('modelToJSONSchema', function () {
+describe('modelToAvroSchema', function () {
   it('should convert supported types', function () {
-    var jsonSchema = lib.modelToJSONSchema(mongoose.model('Types'));
+    var avroSchema = lib.modelToAvroSchema(mongoose.model('Types'));
 
-    expect(jsonSchema.properties.arrayProp.type).to.be.equal('array');
+    expect(avroSchema.fields.arrayProp.type).to.be.equal('array');
 
-    expect(jsonSchema.properties.arrayTypedProp.type).to.be.equal('array');
-    expect(jsonSchema.properties.arrayTypedProp.items).to.be.deep.equal({
+    expect(avroSchema.fields.arrayTypedProp.type).to.be.equal('array');
+    expect(avroSchema.fields.arrayTypedProp.items).to.be.deep.equal({
       type: 'object'
     });
 
-    expect(jsonSchema.properties.mixedProp.type).to.be.equal('object');
+    expect(avroSchema.fields.mixedProp.type).to.be.equal('object');
 
-    expect(jsonSchema.properties.objectId.type).to.be.equal('string');
+    expect(avroSchema.fields.objectId.type).to.be.equal('string');
 
-    expect(jsonSchema.properties.booleanProp.type).to.be.equal('boolean');
+    expect(avroSchema.fields.booleanProp.type).to.be.equal('boolean');
 
-    expect(jsonSchema.properties.numberProp.type).to.be.equal('number');
+    expect(avroSchema.fields.numberProp.type).to.be.equal('float');
 
-    expect(jsonSchema.properties.objectProp.type).to.be.equal('object');
+    expect(avroSchema.fields.objectProp.type).to.be.equal('object');
 
-    expect(jsonSchema.properties.stringProp.type).to.be.equal('string');
+    expect(avroSchema.fields.stringProp.type).to.be.equal('string');
 
-    expect(jsonSchema.properties.dateProp.type).to.be.equal('string');
-    expect(jsonSchema.properties.dateProp.format).to.be.equal('date-time');
+    expect(avroSchema.fields.dateProp.type).to.be.equal('long');
+    expect(avroSchema.fields.dateProp.logicalType).to.be.equal('timestamp-millis');
   });
 
   it('should convert constraints', function (done) {
-    var jsonSchema = lib.modelToJSONSchema(mongoose.model('Constraints'));
+    var avroSchema = lib.modelToAvroSchema(mongoose.model('Constraints'));
 
-    expect(jsonSchema.properties.simpleProp).to.exist;
+    expect(avroSchema.fields.simpleProp).to.exist;
 
-    expect(jsonSchema.properties.requiredProp).to.exist;
-    expect(jsonSchema.required).to.be.deep.equal(['requiredProp']);
+    expect(avroSchema.fields.requiredProp).to.exist;
+    expect(avroSchema.required).to.be.deep.equal(['requiredProp']);
 
-    expect(jsonSchema.properties.enumedProp).to.exist;
-    expect(jsonSchema.properties.enumedProp.enum).to.be.deep.equal(['one', 'two']);
+    expect(avroSchema.fields.enumedProp).to.exist;
+    expect(avroSchema.fields.enumedProp.enum).to.be.deep.equal(['one', 'two']);
 
-    expect(jsonSchema.properties.defaultProp).to.exist;
-    expect(jsonSchema.properties.defaultProp.default).to.be.equal('default-value');
+    expect(avroSchema.fields.defaultProp).to.exist;
+    expect(avroSchema.fields.defaultProp.default).to.be.equal('default-value');
 
     done();
   });
 
   it('should convert nested schema', function () {
-    var jsonSchema = lib.modelToJSONSchema(mongoose.model('Nested'));
+    var avroSchema = lib.modelToAvroSchema(mongoose.model('Nested'));
 
-    expect(jsonSchema.properties.root.properties).to.exist;
-    expect(jsonSchema.properties.root.properties.nestedProp).to.exist;
-    expect(jsonSchema.properties.root.required).to.be.deep.equal(['nestedProp']);
+    expect(avroSchema.fields.root.fields).to.exist;
+    expect(avroSchema.fields.root.fields.nestedProp).to.exist;
+    expect(avroSchema.fields.root.required).to.be.deep.equal(['nestedProp']);
   });
 
   describe('options', function(){
     describe('reserved', function(){
       it('should filter out fields provided as an array', function(){
-        var jsonSchema = lib.modelToJSONSchema(mongoose.model('Types'), {
+        var avroSchema = lib.modelToAvroSchema(mongoose.model('Types'), {
           reserved: ['stringProp']
         });
-        expect(jsonSchema.properties.stringProp).to.be.undefined;
+        expect(avroSchema.fields.stringProp).to.be.undefined;
       });
       it('should filter out fields as defined in a flag map', function(){
-        var jsonSchema = lib.modelToJSONSchema(mongoose.model('Types'), {
+        var avroSchema = lib.modelToAvroSchema(mongoose.model('Types'), {
           reserved: {
             stringProp: true,
             _id: false
           }
         });
-        expect(jsonSchema.properties.stringProp).to.be.undefined;
-        expect(jsonSchema.properties._id).to.exist;
+        expect(avroSchema.fields.stringProp).to.be.undefined;
+        expect(avroSchema.fields._id).to.exist;
       });
     })
   });
