@@ -13,26 +13,26 @@ describe('modelToAvroSchema', function () {
   it('should convert supported types', function () {
     var avroSchema = lib.modelToAvroSchema(mongoose.model('Types'));
 
-    expect(avroSchema.fields.arrayProp.type).to.be.equal('array');
+    expect(avroSchema.fields.arrayProp.type).to.be.deep.equal(['null', 'array']);
 
-    expect(avroSchema.fields.arrayTypedProp.type).to.be.equal('array');
+    expect(avroSchema.fields.arrayTypedProp.type).to.be.deep.equal(['null', 'array']);
     expect(avroSchema.fields.arrayTypedProp.items).to.be.deep.equal({
       type: 'object'
     });
 
-    expect(avroSchema.fields.mixedProp.type).to.be.equal('object');
+    expect(avroSchema.fields.mixedProp.type).to.be.deep.equal(['null', 'object']);
 
-    expect(avroSchema.fields.objectId.type).to.be.equal('string');
+    expect(avroSchema.fields.objectId.type).to.be.deep.equal(['null', 'string']);
 
-    expect(avroSchema.fields.booleanProp.type).to.be.equal('boolean');
+    expect(avroSchema.fields.booleanProp.type).to.be.deep.equal(['null', 'boolean']);
 
-    expect(avroSchema.fields.numberProp.type).to.be.equal('float');
+    expect(avroSchema.fields.numberProp.type).to.be.deep.equal(['null', 'float']);
 
-    expect(avroSchema.fields.objectProp.type).to.be.equal('object');
+    expect(avroSchema.fields.objectProp.type).to.be.deep.equal(['null', 'object']);
 
-    expect(avroSchema.fields.stringProp.type).to.be.equal('string');
+    expect(avroSchema.fields.stringProp.type).to.be.deep.equal(['null', 'string']);
 
-    expect(avroSchema.fields.dateProp.type).to.be.equal('long');
+    expect(avroSchema.fields.dateProp.type).to.be.deep.equal(['null', 'long']);
     expect(avroSchema.fields.dateProp.logicalType).to.be.equal('timestamp-millis');
   });
 
@@ -41,8 +41,7 @@ describe('modelToAvroSchema', function () {
 
     expect(avroSchema.fields.simpleProp).to.exist;
 
-    expect(avroSchema.fields.requiredProp).to.exist;
-    expect(avroSchema.required).to.be.deep.equal(['requiredProp']);
+    expect(avroSchema.fields.requiredProp.type).to.be.equal('string');
 
     expect(avroSchema.fields.enumedProp).to.exist;
     expect(avroSchema.fields.enumedProp.enum).to.be.deep.equal(['one', 'two']);
@@ -55,6 +54,7 @@ describe('modelToAvroSchema', function () {
 
   it('should convert nested schema', function () {
     var avroSchema = lib.modelToAvroSchema(mongoose.model('Nested'));
+    console.log(avroSchema);
 
     expect(avroSchema.fields.root.fields).to.exist;
     expect(avroSchema.fields.root.fields.nestedProp).to.exist;
