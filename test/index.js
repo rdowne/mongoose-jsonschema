@@ -1,7 +1,7 @@
 /// <reference path="../typings/chai/chai.d.ts"/>
 /// <reference path="../typings/mocha/mocha.d.ts"/>
 /// <reference path="../typings/mongoose/mongoose.d.ts"/>
-
+var avro = require('avro-js');
 var chai = require('chai'),
     mongoose = require('mongoose'),
 
@@ -12,53 +12,71 @@ var chai = require('chai'),
 describe('modelToAvroSchema', function () {
   it('should convert supported types', function () {
     var avroSchema = lib.modelToAvroSchema(mongoose.model('Types'));
+    console.log(avroSchema);
+    //avro.parse(avroSchema);
 
-    expect(avroSchema.fields.arrayProp.type).to.be.deep.equal(['null', 'array']);
+    var fieldsByName = {};
+    avroSchema.fields.forEach(function(f) {
+      fieldsByName[f.name] = f;
+    });
 
-    expect(avroSchema.fields.arrayTypedProp.type).to.be.deep.equal(['null', 'array']);
-    expect(avroSchema.fields.arrayTypedProp.items).to.be.deep.equal({
+    expect(fieldsByName.arrayProp.type).to.be.deep.equal(['null', 'array']);
+
+    expect(fieldsByName.arrayTypedProp.type).to.be.deep.equal(['null', 'array']);
+    expect(fieldsByName.arrayTypedProp.items).to.be.deep.equal({
       type: 'object'
     });
 
-    expect(avroSchema.fields.mixedProp.type).to.be.deep.equal(['null', 'object']);
+    expect(fieldsByName.mixedProp.type).to.be.deep.equal(['null', 'object']);
 
-    expect(avroSchema.fields.objectId.type).to.be.deep.equal(['null', 'string']);
+    expect(fieldsByName.objectId.type).to.be.deep.equal(['null', 'string']);
 
-    expect(avroSchema.fields.booleanProp.type).to.be.deep.equal(['null', 'boolean']);
+    expect(fieldsByName.booleanProp.type).to.be.deep.equal(['null', 'boolean']);
 
-    expect(avroSchema.fields.numberProp.type).to.be.deep.equal(['null', 'float']);
+    expect(fieldsByName.numberProp.type).to.be.deep.equal(['null', 'float']);
 
-    expect(avroSchema.fields.objectProp.type).to.be.deep.equal(['null', 'object']);
+    expect(fieldsByName.objectProp.type).to.be.deep.equal(['null', 'object']);
 
-    expect(avroSchema.fields.stringProp.type).to.be.deep.equal(['null', 'string']);
+    expect(fieldsByName.stringProp.type).to.be.deep.equal(['null', 'string']);
 
-    expect(avroSchema.fields.dateProp.type).to.be.deep.equal(['null', 'long']);
-    expect(avroSchema.fields.dateProp.logicalType).to.be.equal('timestamp-millis');
+    expect(fieldsByName.dateProp.type).to.be.deep.equal(['null', 'long']);
+    expect(fieldsByName.dateProp.logicalType).to.be.equal('timestamp-millis');
   });
 
   it('should convert constraints', function (done) {
     var avroSchema = lib.modelToAvroSchema(mongoose.model('Constraints'));
 
-    expect(avroSchema.fields.simpleProp).to.exist;
+    var fieldsByName = {};
+    avroSchema.fields.forEach(function(f) {
+      fieldsByName[f.name] = f;
+    });
+    
+    expect(fieldsByName.simpleProp).to.exist;
 
-    expect(avroSchema.fields.requiredProp.type).to.be.equal('string');
+    expect(fieldsByName.requiredProp.type).to.be.equal('string');
 
-    expect(avroSchema.fields.enumedProp).to.exist;
-    expect(avroSchema.fields.enumedProp.enum).to.be.deep.equal(['one', 'two']);
+    expect(fieldsByName.enumedProp).to.exist;
+    expect(fieldsByName.enumedProp.enum).to.be.deep.equal(['one', 'two']);
 
-    expect(avroSchema.fields.defaultProp).to.exist;
-    expect(avroSchema.fields.defaultProp.default).to.be.equal('default-value');
+    expect(fieldsByName.defaultProp).to.exist;
+    expect(fieldsByName.defaultProp.default).to.be.equal('default-value');
 
     done();
   });
 
   it('should convert nested schema', function () {
     var avroSchema = lib.modelToAvroSchema(mongoose.model('Nested'));
+
+    var fieldsByName = {};
+    avroSchema.fields.forEach(function(f) {
+      fieldsByName[f.name] = f;
+    });
+    
     console.log(avroSchema);
 
-    expect(avroSchema.fields.root.fields).to.exist;
-    expect(avroSchema.fields.root.fields.nestedProp).to.exist;
-    expect(avroSchema.fields.root.required).to.be.deep.equal(['nestedProp']);
+    expect(fieldsByName.root.fields).to.exist;
+    expect(fieldsByName.root.fields.nestedProp).to.exist;
+    expect(fieldsByName.root.required).to.be.deep.equal(['nestedProp']);
   });
 
   describe('options', function(){
